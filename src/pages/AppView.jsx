@@ -9,6 +9,7 @@ import { PanelLeft } from "lucide-react";
 import ChatSidebar from "./sideBar.jsx";
 import MessageView from "./MessageView.jsx";
 import { API_BASE_URL } from "../config.js";
+import { WS_BASE_URL } from "../config.js";
 
 export const ConversationContext = createContext();
 
@@ -25,7 +26,7 @@ export default function AppView() {
     const token = localStorage.getItem("token");
 
     const ws = new WebSocket(
-      `ws://${API_BASE_URL}/ws?token=${encodeURIComponent(token)}`
+      `${WS_BASE_URL}/ws?token=${token}`
     );
 
     ws.onopen = () => {
