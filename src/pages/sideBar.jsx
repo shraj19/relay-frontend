@@ -5,7 +5,7 @@ import {
   Search,
   X,
 } from "lucide-react";
-
+import {API_BASE_URL} from "../config.js";
 import { useNavigate } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { ConversationContext } from "./AppView.jsx";
@@ -35,7 +35,7 @@ export default function ChatSidebar({
 
       try {
         const resp = await fetch(
-          "/api/conversation/list",
+          `${API_BASE_URL}/api/conversation/list`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

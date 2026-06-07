@@ -8,6 +8,7 @@ import { PanelLeft } from "lucide-react";
 
 import ChatSidebar from "./sideBar.jsx";
 import MessageView from "./MessageView.jsx";
+import { API_BASE_URL } from "../config.js";
 
 export const ConversationContext = createContext();
 
@@ -24,7 +25,7 @@ export default function AppView() {
     const token = localStorage.getItem("token");
 
     const ws = new WebSocket(
-      `ws://localhost:8080/ws?token=${encodeURIComponent(token)}`
+      `ws://${API_BASE_URL}/ws?token=${encodeURIComponent(token)}`
     );
 
     ws.onopen = () => {
@@ -96,7 +97,7 @@ export default function AppView() {
 
       try {
         const resp = await fetch(
-          `/api/conversation/messages?conversation_id=${conversation.id}`,
+          `${API_BASE_URL}/api/conversation/messages?conversation_id=${conversation.id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config.js";
 
 function CreateConversation() {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ function CreateConversation() {
     }
 
     try {
-      const resp = await fetch("/api/conversation/create", {
+      const resp = await fetch(`${API_BASE_URL}/api/conversation/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -69,7 +70,7 @@ function CreateConversation() {
 
     try {
       const resp = await fetch(
-        `/api/users/search?q=${encodeURIComponent(query)}`,
+        `${API_BASE_URL}/api/users/search?q=${encodeURIComponent(query)}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
