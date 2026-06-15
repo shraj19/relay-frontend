@@ -24,24 +24,14 @@ function AuthProvider({ children }) {
 
     useEffect(() => {
         async function loadUser() {
-            const token = localStorage.getItem("token");
-            if(!token) {
-                setLoading(false);
-                return;
-            }
-
+            setLoading(true);
             try {
-                const response = await fetch(`${API_BASE_URL}/api/me`, { 
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+                const response = await fetch(`${API_BASE_URL}/api/me`,{
+                    credentials: "include",
                 });
-
                 const data = await parseResponse(response);
                 
                 setUser({username:data.username, email:data.email, created_at:data.created_at, user_id:data.user_id});   
-            } catch (error) {
-                localStorage.removeItem("token");
             } finally {
                 setLoading(false);
             }
@@ -54,6 +44,7 @@ function AuthProvider({ children }) {
     const login = async (username, password) => {
         const response = await fetch(`${API_BASE_URL}/api/login`, {
             method: "POST",
+            credentials: "include",
             headers: {
                 "Content-Type": "application/json",
             },
@@ -61,15 +52,16 @@ function AuthProvider({ children }) {
         });
 
         const data = await parseResponse(response);
-
-        localStorage.setItem("token", data.token);
         setUser({username:data.username, email:data.email, created_at:data.created_at, user_id:data.user_id});   
 
         return data;
     }
 
-    const logout = () => {
-        localStorage.removeItem("token");
+    const logout = async () => {
+        await fetch(`${API_BASE_URL}/api/logout`, {
+            method: "POST",
+            credentials: "include",
+        });
         setUser(null);
     }
 
@@ -83,8 +75,6 @@ function AuthProvider({ children }) {
         });
         
         const data = await parseResponse(response);
-
-        localStorage.setItem("token", data.token);
         setUser({username:data.username, email:data.email, created_at:data.created_at, user_id:data.user_id});     
 
         return data;

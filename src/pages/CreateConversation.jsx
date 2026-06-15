@@ -19,9 +19,7 @@ function CreateConversation() {
     title,
     participant_usernames = []
   ) {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
+    if (!user) {
       navigate("/login");
       return;
     }
@@ -29,9 +27,9 @@ function CreateConversation() {
     try {
       const resp = await fetch(`${API_BASE_URL}/api/conversation/create`, {
         method: "POST",
+        credentials:"include",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           type,
@@ -56,9 +54,7 @@ function CreateConversation() {
   }
 
   async function searchUsers(query) {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
+    if(!user) {
       navigate("/login");
       return;
     }
@@ -70,13 +66,9 @@ function CreateConversation() {
 
     try {
       const resp = await fetch(
-        `${API_BASE_URL}/api/users/search?q=${encodeURIComponent(query)}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+        `${API_BASE_URL}/api/users/search?q=${encodeURIComponent(query)}`,{
+          credentials:"include",
+        });
 
       const data = await resp.json();
 

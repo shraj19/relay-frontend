@@ -23,10 +23,8 @@ export default function AppView() {
 
   // Create websocket once
   useEffect(() => {
-    const token = localStorage.getItem("token");
-
     const ws = new WebSocket(
-      `${WS_BASE_URL}/ws?token=${token}`
+      `${WS_BASE_URL}/api/ws`
     );
 
     ws.onopen = () => {
@@ -92,17 +90,10 @@ export default function AppView() {
         setMessages([]);
         return;
       }
-
-      const token = localStorage.getItem("token");
-      if (!token) return;
-
       try {
         const resp = await fetch(
-          `${API_BASE_URL}/api/conversation/messages?conversation_id=${conversation.id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+          `${API_BASE_URL}/api/conversation/messages?conversation_id=${conversation.id}`,{
+            credentials:"include",
           }
         );
 
@@ -146,14 +137,14 @@ export default function AppView() {
           <PanelLeft size={20} />
         </button>
 
-        <div className="flex-1 flex flex-col text-white">
+        <div className="flex-1 flex flex-col text-white min-h-0">
           {!conversation ? (
             <div className="flex-1 flex items-center justify-center">
               Select a conversation to start chatting
             </div>
           ) : (
             <>
-              <div className="border-b border-zinc-800 p-4">
+              <div className="border-b border-zinc-800 p-4 shrink-0">
                 <h1 className="text-xl font-semibold">
                   {conversation.title}
                 </h1>

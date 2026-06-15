@@ -27,21 +27,11 @@ export default function ChatSidebar({
 
   useEffect(() => {
     async function fetchConversations() {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
       try {
         const resp = await fetch(
-          `${API_BASE_URL}/api/conversation/list`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+          `${API_BASE_URL}/api/conversation/list`,{
+            credentials:"include",
+          });
 
         if (!resp.ok) {
           throw new Error(
@@ -77,12 +67,20 @@ export default function ChatSidebar({
   return (
     <div
       className={`
-        h-screen bg-zinc-950 text-white border-r border-zinc-800
-        flex flex-col transition-all duration-300 ease-in-out
-        overflow-hidden
-        ${isOpen ? "w-80" : "w-0"}
-        ${!isOpen ? "pointer-events-none" : ""}
-      `}
+      h-screen bg-zinc-950 text-white border-r border-zinc-800
+      flex flex-col overflow-hidden
+
+      fixed inset-0 z-50
+      md:relative md:inset-auto
+
+      transition-all duration-300
+
+      ${
+        isOpen
+          ? "w-full md:w-80 translate-x-0"
+          : "w-0 md:w-0 -translate-x-full md:translate-x-0"
+      }
+    `}
     >
       {/* Header */}
       <div className="p-4 flex items-center justify-between">

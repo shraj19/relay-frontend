@@ -25,6 +25,7 @@ export default function MessageView() {
     ws.send(
       JSON.stringify({
         type: "message",
+        username: user.username,
         conversation_id:
           conversation.id,
         content,
@@ -35,7 +36,7 @@ export default function MessageView() {
   };
 
   return (
-    <div className="flex flex-col flex-1">
+    <div className="flex flex-col flex-1 min-h-0">
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
         {messages.length === 0 ? (
           <div className="text-zinc-500 text-center">
@@ -60,7 +61,7 @@ export default function MessageView() {
             : "text-zinc-500"
         }`}
       >
-        {message.sender_id}
+        {message.sender_username}
       </div>
 
       <div
@@ -78,7 +79,7 @@ export default function MessageView() {
         )}
       </div>
 
-      <div className="border-t border-zinc-800 p-4 flex gap-2">
+      <div className="border-t border-zinc-800 p-4 flex gap-2 shrink-0">
         <input
           value={content}
           onChange={(e) =>
@@ -90,7 +91,7 @@ export default function MessageView() {
             }
           }}
           placeholder="Type a message..."
-          className="flex-1 bg-zinc-800 rounded-lg p-3 outline-none"
+          className="flex-1 bg-zinc-800 rounded-lg p-3 outline-none w-full"
         />
 
         <button
