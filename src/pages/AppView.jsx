@@ -1,15 +1,9 @@
-import {
-  useState,
-  useEffect,
-  useRef,
-  createContext,
-} from "react";
+import { useState, useEffect, useRef, useCallback, createContext } from "react";
 import { PanelLeft } from "lucide-react";
 
 import ChatSidebar from "./sideBar.jsx";
 import MessageView from "./MessageView.jsx";
-import { API_BASE_URL } from "../config.js";
-import { WS_BASE_URL } from "../config.js";
+import { API_BASE_URL, WS_BASE_URL } from "../config.js";
 
 export const ConversationContext = createContext();
 
@@ -21,21 +15,23 @@ export default function AppView() {
   const wsRef = useRef(null);
   const previousConversationRef = useRef(null);
 
-  // Create websocket once
+  // Create WebSocket connection once
   useEffect(() => {
-    const ws = new WebSocket(
-      `${WS_BASE_URL}/api/ws`
-    );
+    const ws = new WebSocket(`${WS_BASE_URL}/api/ws`);
 
     ws.onopen = () => {
       console.log("WebSocket connected");
     };
 
     ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
+      try {
+        const data = JSON.parse(event.data);
 
-      if (data.type === "message") {
-        setMessages((prev) => [...prev, data]);
+        if (data.type === "message") {
+          setMessages((prev) => [...prev, data]);
+        }
+      } catch (err) {
+        console.error("Failed to parse WebSocket message:", err);
       }
     };
 
@@ -57,7 +53,6 @@ export default function AppView() {
   // Subscribe/unsubscribe on conversation change
   useEffect(() => {
     const ws = wsRef.current;
-
     if (!ws || ws.readyState !== WebSocket.OPEN) return;
 
     const previous = previousConversationRef.current;
@@ -85,31 +80,36 @@ export default function AppView() {
 
   // Load conversation history
   useEffect(() => {
+    if (!conversation) {
+      setMessages([]);
+      return;
+    }
+
+    let cancelled = false;
+
     async function fetchMessages() {
-      if (!conversation) {
-        setMessages([]);
-        return;
-      }
       try {
         const resp = await fetch(
-          `${API_BASE_URL}/api/conversation/messages?conversation_id=${conversation.id}`,{
-            credentials:"include",
-          }
+          `${API_BASE_URL}/api/conversation/messages?conversation_id=${conversation.id}`,
+          { credentials: "include" }
         );
 
-        if (!resp.ok) {
-          throw new Error("Failed to fetch messages");
-        }
+        if (!resp.ok) throw new Error("Failed to fetch messages");
 
         const data = await resp.json();
-
-        setMessages(data.Messages || []);
+        if (!cancelled) {
+          setMessages(data.Messages || []);
+        }
       } catch (err) {
-        console.error(err);
+        console.error("Error fetching messages:", err);
       }
     }
 
     fetchMessages();
+
+    return () => {
+      cancelled = true;
+    };
   }, [conversation]);
 
   return (
@@ -123,15 +123,10 @@ export default function AppView() {
       }}
     >
       <div className="flex h-screen bg-zinc-900">
-        <ChatSidebar
-          isOpen={sidebarOpen}
-          setIsOpen={setSidebarOpen}
-        />
+        <ChatSidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
 
         <button
-          onClick={() =>
-            setSidebarOpen((prev) => !prev)
-          }
+          onClick={() => setSidebarOpen((prev) => !prev)}
           className="h-fit mt-4 ml-2 p-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white"
         >
           <PanelLeft size={20} />
@@ -139,17 +134,16 @@ export default function AppView() {
 
         <div className="flex-1 flex flex-col text-white min-h-0">
           {!conversation ? (
-            <div className="flex-1 flex items-center justify-center">
+            <div className="flex-1 flex items-center justify-center text-zinc-500">
               Select a conversation to start chatting
             </div>
           ) : (
             <>
               <div className="border-b border-zinc-800 p-4 shrink-0">
                 <h1 className="text-xl font-semibold">
-                  {conversation.title}
+                  {conversation.display_name || conversation.title}
                 </h1>
               </div>
-
               <MessageView />
             </>
           )}

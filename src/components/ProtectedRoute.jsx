@@ -1,17 +1,22 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
-import { useEffect } from "react";
+
 function ProtectedRoute({ children }) {
-    const { isAuthenticated , loading } = useAuth();
-    if (loading) {
-        return <div>Loading...</div>;
-    }
+  const { isAuthenticated, loading } = useAuth();
 
-    if (!isAuthenticated) {
-        return <Navigate to="/signIn" replace />;
-    }
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-zinc-900 text-white">
+        Loading...
+      </div>
+    );
+  }
 
-    return children;
+  if (!isAuthenticated) {
+    return <Navigate to="/signIn" replace />;
+  }
+
+  return children;
 }
 
-export default ProtectedRoute
+export default ProtectedRoute;

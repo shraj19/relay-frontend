@@ -1,25 +1,12 @@
-import {
-  MessageSquare,
-  Plus,
-  User,
-  Search,
-  X,
-} from "lucide-react";
-import {API_BASE_URL} from "../config.js";
+import { MessageSquare, Plus, User, Search, X } from "lucide-react";
+import { API_BASE_URL } from "../config.js";
 import { useNavigate } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { ConversationContext } from "./AppView.jsx";
 
-export default function ChatSidebar({
-  isOpen,
-  setIsOpen,
-}) {
+export default function ChatSidebar({ isOpen, setIsOpen }) {
   const navigate = useNavigate();
-
-  const {
-    conversation,
-    setConversation,
-  } = useContext(ConversationContext);
+  const { conversation, setConversation } = useContext(ConversationContext);
 
   const [conversations, setConversations] = useState([]);
   const [search, setSearch] = useState("");
@@ -28,27 +15,16 @@ export default function ChatSidebar({
   useEffect(() => {
     async function fetchConversations() {
       try {
-        const resp = await fetch(
-          `${API_BASE_URL}/api/conversation/list`,{
-            credentials:"include",
-          });
+        const resp = await fetch(`${API_BASE_URL}/api/conversation/list`, {
+          credentials: "include",
+        });
 
-        if (!resp.ok) {
-          throw new Error(
-            "Failed to fetch conversations"
-          );
-        }
+        if (!resp.ok) throw new Error("Failed to fetch conversations");
 
         const data = await resp.json();
-
-        setConversations(
-          data.conversations || []
-        );
+        setConversations(data.conversations || []);
       } catch (err) {
-        console.error(
-          "Error fetching conversations:",
-          err
-        );
+        console.error("Error fetching conversations:", err);
       } finally {
         setLoading(false);
       }
@@ -57,43 +33,35 @@ export default function ChatSidebar({
     fetchConversations();
   }, []);
 
-  const filteredConversations =
-    conversations.filter((chat) =>
-      (chat.display_name || chat.title || "")
-        .toLowerCase()
-        .includes(search.toLowerCase())
-    );
+  const filteredConversations = conversations.filter((chat) =>
+    (chat.display_name || chat.title || "")
+      .toLowerCase()
+      .includes(search.toLowerCase())
+  );
 
   return (
     <div
       className={`
-      h-screen bg-zinc-950 text-white border-r border-zinc-800
-      flex flex-col overflow-hidden
-
-      fixed inset-0 z-50
-      md:relative md:inset-auto
-
-      transition-all duration-300
-
-      ${
-        isOpen
-          ? "w-full md:w-80 translate-x-0"
-          : "w-0 md:w-0 -translate-x-full md:translate-x-0"
-      }
-    `}
+        h-screen bg-zinc-950 text-white border-r border-zinc-800
+        flex flex-col overflow-hidden
+        fixed inset-0 z-50
+        md:relative md:inset-auto
+        transition-all duration-300
+        ${
+          isOpen
+            ? "w-full md:w-80 translate-x-0"
+            : "w-0 md:w-0 -translate-x-full md:translate-x-0"
+        }
+      `}
     >
       {/* Header */}
       <div className="p-4 flex items-center justify-between">
-        <h2 className="text-2xl font-semibold">
-          Chats
-        </h2>
+        <h2 className="text-2xl font-semibold">Chats</h2>
 
         <div className="flex items-center gap-2">
           <button
             className="p-2 rounded-lg hover:bg-zinc-800"
-            onClick={() =>
-              navigate("/create-conversation")
-            }
+            onClick={() => navigate("/create-conversation")}
           >
             <Plus size={20} />
           </button>
@@ -110,57 +78,41 @@ export default function ChatSidebar({
       {/* Search */}
       <div className="px-4 pb-4">
         <div className="flex items-center bg-zinc-900 rounded-xl px-3 py-2">
-          <Search
-            size={18}
-            className="text-zinc-400"
-          />
-
+          <Search size={18} className="text-zinc-400" />
           <input
             value={search}
-            onChange={(e) =>
-              setSearch(e.target.value)
-            }
+            onChange={(e) => setSearch(e.target.value)}
             placeholder="Search chats..."
             className="bg-transparent outline-none ml-2 w-full"
           />
         </div>
       </div>
 
-      {/* Chats */}
+      {/* Conversations list */}
       <div className="flex-1 overflow-y-auto">
         {loading ? (
-          <div className="px-4 py-3 text-zinc-500">
-            Loading conversations...
-          </div>
+          <div className="px-4 py-3 text-zinc-500">Loading conversations...</div>
         ) : filteredConversations.length === 0 ? (
-          <div className="px-4 py-3 text-zinc-500">
-            No conversations found
-          </div>
+          <div className="px-4 py-3 text-zinc-500">No conversations found</div>
         ) : (
           filteredConversations.map((chat) => (
             <div
-              key={chat.conversation_id}
+              key={chat.id}
               onClick={() => {
                 setConversation(chat);
                 setIsOpen(false);
               }}
-              className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors
-                ${
-                  conversation?.conversation_id ===
-                  chat.conversation_id
-                    ? "bg-zinc-800"
-                    : "hover:bg-zinc-900"
-                }
-              `}
+              className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors ${
+                conversation?.id === chat.id ? "bg-zinc-800" : "hover:bg-zinc-900"
+              }`}
             >
-              <div className="w-12 h-12 rounded-full bg-zinc-700 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-full bg-zinc-700 flex items-center justify-center shrink-0">
                 <MessageSquare size={20} />
               </div>
 
               <div className="flex-1 min-w-0">
                 <h4 className="font-medium truncate">
-                  {chat.display_name ||
-                    chat.title}
+                  {chat.display_name || chat.title}
                 </h4>
               </div>
             </div>
@@ -168,12 +120,10 @@ export default function ChatSidebar({
         )}
       </div>
 
-      {/* Dashboard */}
+      {/* Profile link */}
       <div className="border-t border-zinc-800 p-3">
         <button
-          onClick={() =>
-            navigate("/dashboard")
-          }
+          onClick={() => navigate("/profile")}
           className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-zinc-900"
         >
           <div className="w-10 h-10 rounded-full bg-cyan-700 flex items-center justify-center">
@@ -181,12 +131,8 @@ export default function ChatSidebar({
           </div>
 
           <div className="text-left">
-            <p className="font-medium">
-              My Dashboard
-            </p>
-            <p className="text-xs text-zinc-400">
-              Profile & settings
-            </p>
+            <p className="font-medium">My Dashboard</p>
+            <p className="text-xs text-zinc-400">Profile & settings</p>
           </div>
         </button>
       </div>
